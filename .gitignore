@@ -1,0 +1,13 @@
+node_modules/
+coverage/
+data/
+tmp/
+local/
+dist/
+build/
+
+**/.DS_Store
+
+*.pid
+
+npm-debug.log

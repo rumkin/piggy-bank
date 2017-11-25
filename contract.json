@@ -1,0 +1,97 @@
+{
+    "address": "0x46b472DD83D36e049ce0986357819fA15CD514A3",
+    "interface": [
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "withdraw",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function",
+            "signature": "0x3ccfd60b"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "owner",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function",
+            "signature": "0x8da5cb5b"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "limit",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function",
+            "signature": "0xa4d66daf"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "getLimit",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function",
+            "signature": "0xb295a00e"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "canWithdraw",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "bool"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function",
+            "signature": "0xb51459fe"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "deposit",
+            "outputs": [],
+            "payable": true,
+            "stateMutability": "payable",
+            "type": "function",
+            "signature": "0xd0e30db0"
+        },
+        {
+            "inputs": [
+                {
+                    "name": "_limit",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "constructor",
+            "signature": "constructor"
+        }
+    ]
+}

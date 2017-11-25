@@ -1,0 +1,771 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Piggy Bank</title>
+
+        <style id="/rumkin/piggy-bank/style.css">html {
+	font-family: sans-serif;
+
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: #06f;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+#app {
+    height: 100%;
+}
+
+.appContainer {
+    min-height: 100%;
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+}
+
+.pageHeader {
+	display: flex;
+	flex-flow: row;
+	box-sizing: border-box;
+}
+
+.pageHeader-cell {
+    	padding: 20px;
+    }
+
+.pageHeader-brand {
+    	font-size: 100%;
+    	margin: 0;
+    }
+
+.pageHeader-slogan {
+    	color: #999;
+    	margin: 0;
+    }
+
+.app {
+	display: flex;
+	justify-content: center;
+	padding: 20px;
+
+	background: #eee;
+}
+
+.piggy {
+	align-self: center;
+	justify-self: center;
+	padding: 20px;
+
+	background-color: #fff;
+	border-radius: 2px;
+
+	box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.05);
+	min-width: 300px;
+}
+
+.piggy-title {
+    	margin: 0;
+    	font-size: 100%;
+    }
+
+.piggy-button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+.pageFooter {
+	display: flex;
+	flex-flow: row;
+	box-sizing: border-box;
+
+	color: #ccc;
+}
+
+.pageFooter-cell {
+		padding: 20px;
+	}
+
+.spacer {
+	flex: auto;
+}
+
+table {
+    width: 100%;
+}
+
+.app-error {
+    padding: 10px;
+    border: 2px solid red;
+    margin-bottom: 10px;
+    background-color: #ffeeee;
+}
+
+.to-right {
+    text-align: right;
+}
+        </style>
+
+        <script src="https://unpkg.com/preact@8.2.1/dist/preact.min.js"></script>
+    </head>
+    <body>
+    <div id="app"></div>
+
+
+    <script id="/bundler.js" language="javascript">;(function() {
+    'use strict';
+
+    function normalize(path) {
+        return path.replace(/\/+|\\+/g, '/').replace(/^\.\//g, '').replace(/\/$/, '');
+    }
+
+    function _join(path) {
+        let segments = Array.prototype.slice.call(arguments)
+        .reduce((result, path) => {
+            return result.concat(path);
+        }, []);
+
+        let result = [];
+        let j = 0;
+
+        for (let i = 0, l = segments.length; i < l; i++, j++) {
+            let item = segments[i];
+
+            if (item === '..') {
+                if (j > 0) {
+                    j -= 2;
+                }
+                else if (j > -1) {
+                    j -= 1;
+                }
+            }
+            else if (item === '.') {
+                if (j > 0) {
+                    j -= 1;
+                }
+            }
+            else {
+                result[j] = item;
+            }
+        }
+
+        return result.slice(0, j);
+    }
+
+    function join(...paths) {
+        let prev;
+        let lastRoot = 0;
+
+        let segments = paths.map((path, i) => {
+            if (path[0] === '/') {
+                lastRoot = i;
+            }
+
+            if (path === '/') {
+                if (prev === '/') {
+                    return [];
+                }
+
+                prev = '/';
+                return [''];
+            }
+            else {
+                prev = normalize(path);
+                return prev.split('/');
+            }
+        })
+        .slice(lastRoot);
+
+        let result = _join.apply(null, segments);
+
+        if (result.length === 1 && result[0] === '') {
+            return '/';
+        }
+        else {
+            return result.join('/');
+        }
+    }
+
+    function resolve(path) {
+        let paths = Array.prototype.slice.call(arguments);
+        paths.unshift('/');
+        return normalize('/' + join.apply(null, paths));
+    }
+
+    function parse(path_) {
+        let path = normalize(path_).split('/');
+
+        let filename = path[path.length - 1];
+        let ext = extname(filename);
+        let name = filename.slice(0, filename.length - ext.length);
+        let dir = path.slice(0, -1).join('/');
+
+        return {
+            root: dir.charAt(0) === '/' ? '/' : '',
+            dir,
+            base: filename,
+            ext,
+            name,
+        };
+    }
+
+    function extname(filename_) {
+        let filename = normalize(filename_);
+
+        let i = filename.lastIndexOf('.');
+        let n = filename.lastIndexOf('/');
+
+        if (i < 0 || n > -1 && i < n) {
+            return '';
+        }
+
+        return filename.slice(i);
+    }
+
+    function basename(filename_) {
+        let filename = normalize(filename_);
+
+        let i = filename.lastIndexOf('/');
+
+        if (i < 0) {
+            return filename;
+        }
+
+        return filename.slice(i);
+    }
+
+    let Path = {
+        resolve: resolve,
+        join: join,
+        normalize: normalize,
+        parse: parse,
+        extname: extname,
+        basename: basename,
+    };
+
+    let Bundler;
+
+    if (window.Bundler) {
+        Bundler = window.Bundler;
+    }
+    else {
+        Bundler = {
+            version: '0.1.0',
+            modules: {},
+            loadedModules: [],
+            hasModule(path) {
+                return modules.hasOwnProperty(Path.resolve(path));
+            },
+        };
+
+        window.Bundler = Bundler;
+    }
+
+    let modules = Bundler.modules;
+    let loadedModules = Bundler.loadedModules;
+    let moduleLoaders = {
+        '': 'js',
+        'wasm': 'js',
+        js(p) {
+            let path = resolveModulePath(p);
+            if (path === void 0) {
+                throw new Error('Module "' + p + '" not found');
+            }
+
+            let module = modules[path];
+
+            if (module.isLoaded) {
+                return module.exports;
+            }
+            else {
+                module.isLoaded = true;
+                if (loadedModules.length) {
+                    module.isMain = false;
+                    module.parent = loadedModules[loadedModules.length - 1];
+                }
+                else {
+                    module.isMain = ! loadedModules.length;
+                    module.parent = null;
+                }
+
+                loadedModules.push(p);
+
+                module.fn(module, module.exports, requirer(module.dirname), module.filename, module.dirname);
+                return module.exports;
+            }
+        },
+        phtml: 'html',
+        html(p) {
+            let module = modules[p];
+
+            if (module) {
+                return module.exports;
+            }
+
+            let script = document.getElementById(p);
+
+            if (! script) {
+                throw new Error('Module "' + p + '" not found');
+            }
+            var ta = document.createElement('textarea');
+            ta.innerHTML = script.textContent;
+            var value = ta.value;
+
+            modules[p] = {
+                filename: p,
+                dirname: p.split('/').slice(0, -1).join('/'),
+                exports: value,
+                isLoaded: true,
+                isMain: false,
+                fn: false,
+            };
+
+            modules[p] = module;
+
+            return value;
+        },
+        json(p) {
+            let module = modules[p];
+
+            if (module) {
+                return module.exports;
+            }
+
+            let script = document.getElementById(p);
+
+            if (! script) {
+                throw new Error('Module "' + p + '" not found');
+            }
+            var ta = document.createElement('textarea');
+            ta.innerHTML = script.textContent;
+            var value;
+            try {
+                value = JSON.parse(ta.value);
+            }
+            catch (err) {
+                throw new Error('Module "' + p + '" is not a valid JSON');
+            }
+
+            modules[p] = {
+                filename: p,
+                dirname: p.split('/').slice(0, -1).join('/'),
+                exports: value,
+                isLoaded: true,
+                isMain: false,
+                fn: false,
+            };
+
+            modules[p] = module;
+
+            return value;
+        },
+    };
+
+    function resolveModulePath(path) {
+        const possiblePaths = [
+            path,
+            path + '/index.js',
+            path + '.js',
+        ];
+
+        return possiblePaths.find((path) => {
+            return modules.hasOwnProperty(path);
+        });
+    }
+
+    function define(path, fn) {
+        let p = Path.resolve('/', path);
+
+        if (modules.hasOwnProperty(p)) {
+            throw new Error('File "' + path + '" already registered');
+        }
+
+        modules[p] = {
+            filename: p,
+            dirname: p.split('/').slice(0, -1).join('/'),
+            exports: {},
+            isLoaded: false,
+            isMain: false,
+            fn,
+        };
+    }
+
+    function lookup(path, needle) {
+        let parts = Path.resolve('/', path).slice(1).split('/');
+        let i = parts.length;
+
+        while (i > 0) {
+            let lookUp = parts.slice(0, i);
+            let fullPath = Path.join('/', lookUp.join('/'), needle);
+
+            if (modules.hasOwnProperty(fullPath)) {
+                return fullPath;
+            }
+
+            i -= 1;
+        }
+
+        return;
+    }
+
+    function requirer(dir) {
+        let req = function require(path) {
+            let p;
+
+            if (/^\.{1,2}(\/?$|\/)/.test(path)) {
+                p = Path.resolve(dir, path);
+            }
+            else if (! path.startsWith('/')) {
+                let rewrite = lookup(dir, '.aliases.js');
+                if (rewrite) {
+                    const modules = require(rewrite);
+
+                    if (modules.hasOwnProperty(path)) {
+                        return modules[path];
+                    }
+                }
+
+                p = Path.resolve('/', path);
+            }
+            else {
+                p = Path.resolve('/', path);
+            }
+
+            let parsed = Path.parse(p);
+            let loader = parsed.ext.slice(1);
+            while (typeof loader !== 'function') {
+                if (! moduleLoaders.hasOwnProperty(loader)) {
+                    throw new Error('Unknown extension "' + loader + '".');
+                }
+                loader = moduleLoaders[loader];
+            }
+
+            return loader(p);
+        };
+
+        req.loadedModules = loadedModules;
+
+        return req;
+    }
+
+    Bundler.define = Bundler.define || define;
+
+    Bundler.es6module = function(defaultValue, restValues) {
+        return Object.assign({}, restValues, {default: defaultValue, __esModule: true});
+    };
+
+    Bundler.require = Bundler.require || requirer('/');
+
+    if (! Bundler.hasModule('Bundler')) {
+        define('Bundler', function(module) {
+            module.exports = Bundler;
+        });
+    }
+
+    if (! Bundler.hasModule('path')) {
+        define('path', function(module) {
+            module.exports = Path;
+        });
+    }
+})();
+
+    </script>
+    <script id="/rumkin/preact/index.js" language="javascript">Bundler.define("/rumkin/preact/index.js", function(module, exports, require, __filename, __dirname) {"use strict";
+
+module.exports = preact;
+});
+    </script>
+    <script id="/rumkin/piggy-bank/test/test.js" language="javascript">Bundler.define("/rumkin/piggy-bank/test/test.js", function(module, exports, require, __filename, __dirname) {'use strict';
+
+var _ = require('..');
+
+var _2 = _interopRequireDefault(_);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+describe('Is true', function () {
+    it('Should be true', function () {
+        should(_2.default).be.equal(true);
+    });
+});
+});
+    </script>
+    <script id="/rumkin/piggy-bank/footer.js" language="javascript">Bundler.define("/rumkin/piggy-bank/footer.js", function(module, exports, require, __filename, __dirname) {"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _preact = require("rumkin/preact");
+
+var _preact2 = _interopRequireDefault(_preact);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = () => _preact2.default.h(
+    "footer",
+    { "class": "pageFooter" },
+    _preact2.default.h(
+        "div",
+        { "class": "pageFooter-cell" },
+        _preact2.default.h(
+            "a",
+            { href: "https://github.com/rumkin/piggy-bank" },
+            "Code"
+        ),
+        " on Github"
+    ),
+    _preact2.default.h("div", { "class": "spacer" }),
+    _preact2.default.h(
+        "div",
+        { "class": "pageFooter-cell" },
+        "\xA9 Rumkin 2017"
+    )
+);
+});
+    </script>
+    <script id="/rumkin/piggy-bank/header.js" language="javascript">Bundler.define("/rumkin/piggy-bank/header.js", function(module, exports, require, __filename, __dirname) {"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _preact = require("rumkin/preact");
+
+var _preact2 = _interopRequireDefault(_preact);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = ({ state }) => _preact2.default.h(
+    "header",
+    { "class": "pageHeader" },
+    _preact2.default.h(
+        "div",
+        { "class": "pageHeader-cell" },
+        _preact2.default.h(
+            "h1",
+            { "class": "pageHeader-brand" },
+            "Piggy Bank"
+        )
+    ),
+    _preact2.default.h(
+        "div",
+        { "class": "pageHeader-cell" },
+        _preact2.default.h(
+            "p",
+            { "class": "pageHeader-slogan" },
+            state.request ? 'Loading...' : 'Save you earnings!'
+        )
+    ),
+    _preact2.default.h("div", { "class": "spacer" }),
+    _preact2.default.h(
+        "div",
+        { "class": "pageHeader-cell" },
+        _preact2.default.h(
+            "span",
+            { "class": "pageHeader-balance" },
+            "Balance: ",
+            _preact2.default.h(
+                "strong",
+                null,
+                state.balance
+            ),
+            " eth."
+        )
+    )
+);
+});
+    </script>
+    <script id="/rumkin/piggy-bank/index.js" language="javascript">Bundler.define("/rumkin/piggy-bank/index.js", function(module, exports, require, __filename, __dirname) {'use strict';
+
+var _preact = require('rumkin/preact');
+
+var _preact2 = _interopRequireDefault(_preact);
+
+var _footer = require('./footer');
+
+var _footer2 = _interopRequireDefault(_footer);
+
+var _header = require('./header');
+
+var _header2 = _interopRequireDefault(_header);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+let render;
+let request;
+
+const App = ({ state }) => {
+    const withdraw = () => {
+        request('/withdraw', 'post');
+    };
+
+    const deposit = () => {
+        request('/deposit', 'post');
+    };
+
+    const reset = () => {
+        state.error = null;
+        render();
+    };
+
+    return _preact2.default.h(
+        'div',
+        { 'class': 'appContainer' },
+        _preact2.default.h(_header2.default, { state: state }),
+        _preact2.default.h(
+            'div',
+            { 'class': 'app' },
+            _preact2.default.h(
+                'div',
+                { 'class': 'piggy' },
+                state.error && _preact2.default.h(
+                    'div',
+                    { 'class': 'app-error', onClick: reset },
+                    state.error
+                ),
+                _preact2.default.h(
+                    'header',
+                    null,
+                    _preact2.default.h(
+                        'h3',
+                        { 'class': 'piggy-title' },
+                        'Contract'
+                    )
+                ),
+                _preact2.default.h(
+                    'div',
+                    null,
+                    _preact2.default.h(
+                        'table',
+                        null,
+                        _preact2.default.h(
+                            'tr',
+                            null,
+                            _preact2.default.h(
+                                'td',
+                                null,
+                                'Balance'
+                            ),
+                            _preact2.default.h(
+                                'td',
+                                { 'class': 'to-right' },
+                                _preact2.default.h(
+                                    'strong',
+                                    null,
+                                    state.contract.balance
+                                ),
+                                ' eth'
+                            )
+                        ),
+                        _preact2.default.h(
+                            'tr',
+                            null,
+                            _preact2.default.h(
+                                'td',
+                                null,
+                                'Limit'
+                            ),
+                            _preact2.default.h(
+                                'td',
+                                { 'class': 'to-right' },
+                                _preact2.default.h(
+                                    'strong',
+                                    null,
+                                    state.contract.limit
+                                ),
+                                ' eth'
+                            )
+                        )
+                    )
+                ),
+                _preact2.default.h(
+                    'div',
+                    null,
+                    _preact2.default.h(
+                        'button',
+                        {
+                            'class': 'piggy-button',
+                            onClick: deposit
+                        },
+                        'Deposit 1 ether'
+                    ),
+                    _preact2.default.h(
+                        'button',
+                        {
+                            'class': 'piggy-button',
+                            onClick: withdraw
+                        },
+                        'Withdraw all'
+                    )
+                )
+            )
+        ),
+        _preact2.default.h(_footer2.default, { state: state })
+    );
+};
+
+const state = {
+    request: null,
+    error: 'Test',
+    balance: 0,
+    contract: {
+        balance: 0,
+        limit: 0
+    }
+};
+
+request = (url, method = 'get') => {
+    if (state.request) {
+        return;
+    }
+
+    const req = fetch(url, {
+        method
+    }).then(async res => {
+        state.request = null;
+
+        const cType = res.headers.get('content-type');
+        if (!cType.includes('application/json')) {
+            state.error = 'Unknown error';
+            return;
+        }
+
+        const data = await res.json();
+        if (res.status !== 200) {
+            console.error(res);
+            state.error = data.error || 'Unknown error';
+        } else {
+            Object.assign(state, data);
+        }
+    }).then(() => render()).catch(error => {
+        console.error(error);
+    });
+
+    state.error = null;
+    state.request = req;
+
+    render();
+};
+
+const root = document.getElementById('app');
+render = () => _preact2.default.render(_preact2.default.h(App, { state: state }), root, root.lastChild);
+
+render();
+request('/state', 'get');
+});
+    </script>
+    <script id="/index.js" language="javascript">Bundler.require("rumkin/piggy-bank");
+    </script>
+    </body>
+</html>
