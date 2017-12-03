@@ -35,12 +35,17 @@ There is several named files:
 
 * `1-account.js` Creates secret key and balance for test net. Outputs `account.json`.
 * `2-compile.js` Compiles contract and write result to `code.json`.
-* `3-connect.js` Connect to testnet with web3 and new account.
-* `4-deploy.js` Deploy contract into testnet and write it's address to `contract.json`.
-* `5-server.js` Run HTTP Server with simple UI to interact with contract.
+* `3-deploy.js` Deploy contract into testnet and write it's address to `contract.json`.
+* `4-run.js` Run HTTP Server with simple UI to interact with contract.
+* `5-destroy.js` Destroy contract and remove it from blockchain.
 
 Repository already contains compiled template and test account. To run step
 5 you need to deploy contract into testnet (`4-deploy.js`).
+
+### Utils
+
+* `bin/testnet.js` Run testnet.
+* `bin/connect.js` Connect to running testnet with web3 and get active account.
 
 ### Contract
 
@@ -55,7 +60,7 @@ function canWithdraw() public constant returns (bool){
 function withdraw() public isOwner {
     require(canWithdraw());
 
-    msg.sender.transfer(this.balance);
+    owner.transfer(this.balance);
 }
 ```
 

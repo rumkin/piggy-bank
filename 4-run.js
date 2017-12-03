@@ -17,6 +17,9 @@ const indexPage = fs.readFileSync(
     path.join(__dirname, 'ui/index.html'), 'utf8'
 );
 
+const PORT = process.env.PORT || 8080;
+const HOST = process.env.HOST || 'localhost';
+
 async function main() {
     const contract = require('./contract.json');
 
@@ -26,21 +29,22 @@ async function main() {
     );
 
     // Get current account address
-    const from = await web3.eth.getCoinbase();
+    const coinbase = await web3.eth.getCoinbase();
 
-    // initialize contract
+    // Initialize contract
     const piggy = new web3.eth.Contract(contract.interface, contract.address, {
         // Set default from address
-        from,
+        from: coinbase,
         // Set default gas amount
         gas: 5000000,
     });
 
+    // Helper method to get current state
     const getState = async () => {
         // Get contract balance
         const contractBalance = await web3.eth.getBalance(contract.address);
         // Get current user balance
-        const balance = await web3.eth.getBalance(from);
+        const balance = await web3.eth.getBalance(coinbase);
         // Get PiggyBank.limit variable
         const limit = await piggy.methods.limit().call();
 
@@ -54,7 +58,7 @@ async function main() {
         };
     };
 
-
+    // Create PiggyAPI Router
     const router = new Plant.Router();
 
     // Route to get state of balance and contract.
@@ -81,7 +85,7 @@ async function main() {
             value = 1;
         }
 
-        const balance = await web3.eth.getBalance(from);
+        const balance = await web3.eth.getBalance(coinbase);
 
         // Convert balance and value to BigNumbers to allow comparision in weis.
         const bnValue = web3.utils.toWei(new BigNum(value), 'ether');
@@ -99,7 +103,6 @@ async function main() {
         // Send value to contract with payable method deposit
         // with method PiggyBank.deposit
         await piggy.methods.deposit().send({
-            from,
             value: bnValue,
         });
 
@@ -128,21 +131,21 @@ async function main() {
         res.json(state);
     });
 
+    // Get UI page
     router.get('/', async ({res}) => {
         res.html(indexPage);
     });
 
-    // Create and run server
+    // Create server
+    const plant = new Plant();
+    plant.use(originHandler);
+    plant.use(errorHandler);
+    plant.use(router);
 
-    const server = new Plant();
-    server.use(originHandler);
-    server.use(errorHandler);
-    server.use(router);
+    const server = http.createServer(plant.handler());
 
-    http.createServer(
-        server.handler()
-    )
-    .listen(8080, () => {
+    // Run server
+    server.listen(PORT, HOST, () => {
         console.log(indent(`
             Server is started at port http://localhost:8080.
 

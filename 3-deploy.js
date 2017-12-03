@@ -11,22 +11,23 @@ async function main() {
         new Web3.providers.HttpProvider('http://localhost:8545')
     );
 
-    const from = await web3.eth.getCoinbase();
+    const coinbase = await web3.eth.getCoinbase();
 
-    const Tickets = new web3.eth.Contract(code.interface, {
-        from,
+    const PiggyBank = new web3.eth.Contract(code.interface, {
+        from: coinbase,
         gas: 5000000,
     });
 
     const limit = process.argv[2] || 2;
 
     // Deploy contract in the testnet
-    const contract = await Tickets.deploy({
+    const contract = await PiggyBank.deploy({
         // Conract body
         data: code.bytecode,
         // Constructor arguments
         arguments: [limit],
-    }).send();
+    })
+    .send();
 
     // Remember contract's address and save with interface
     fs.writeFileSync('contract.json', JSON.stringify({

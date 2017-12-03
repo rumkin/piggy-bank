@@ -28,8 +28,8 @@ contract PiggyBank {
     }
 
     // Check if current balance is greate then a limit to allow withdrawing
-    function canWithdraw() public constant returns (bool){
-        return this.balance >= limit;
+    function canWithdraw() public constant returns (bool) {
+        return owner == msg.sender && this.balance >= limit;
     }
 
     // Send entire balance to the contract owner
@@ -37,5 +37,12 @@ contract PiggyBank {
         require(canWithdraw());
 
         owner.transfer(this.balance);
+    }
+
+    // Destroy contract
+    function kill() public isOwner {
+        require(this.balance == 0);
+
+        selfdestruct(owner);
     }
 }

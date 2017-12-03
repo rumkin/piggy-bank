@@ -7,6 +7,7 @@ const code = require('../code.json');
 
 describe('PiggyBank Contract', function() {
     let web3;
+    let PiggyBank;
     let piggy;
     let coinbase;
     let accounts;
@@ -27,20 +28,25 @@ describe('PiggyBank Contract', function() {
         accounts = await web3.eth.getAccounts();
         coinbase = accounts[0];
 
-        const gas = 5000000;
 
-        const limit = 2;
-
-        const PiggyBank = new web3.eth.Contract(code.interface, {
+        PiggyBank = new web3.eth.Contract(code.interface, {
             from: coinbase,
-            gas,
+            gas: 5000000,
         });
+    });
 
-        piggy = await PiggyBank.deploy({
-            data: code.bytecode,
-            arguments: [limit],
-        })
-        .send();
+    describe('PiggyBank()', function() {
+        it('Should instantiate contract', async function() {
+            piggy = await PiggyBank.deploy({
+                data: code.bytecode,
+                arguments: [2],
+            })
+            .send();
+
+            const limit = await piggy.methods.limit().call();
+
+            should(web3.utils.fromWei(limit, 'ether')).be.equal('2');
+        });
     });
 
     describe('deposit()', function () {

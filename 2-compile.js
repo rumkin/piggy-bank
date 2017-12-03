@@ -11,11 +11,11 @@ async function main() {
     const result = solc.compile(source);
 
     // Extract bytecode and program interface from compiled data
-    const tickets = result.contracts[':PiggyBank'];
+    const compiled = result.contracts[':PiggyBank'];
 
     const contract = {
-        interface: JSON.parse(tickets.interface),
-        bytecode: tickets.bytecode,
+        interface: JSON.parse(compiled.interface),
+        bytecode: compiled.bytecode,
     };
 
     console.log('Write "code.json"');
