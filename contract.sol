@@ -36,6 +36,6 @@ contract PiggyBank {
     function withdraw() public isOwner {
         require(canWithdraw());
 
-        msg.sender.transfer(this.balance);
+        owner.transfer(this.balance);
     }
 }
