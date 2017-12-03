@@ -12,6 +12,8 @@ contract PiggyBank {
         require(msg.sender == owner);
         _;
     }
+    // Event to notify about deposit
+    event Deposit(address indexed from, uint value);
 
     function PiggyBank(uint _limit) public {
         require(_limit > 0);
@@ -20,19 +22,20 @@ contract PiggyBank {
         limit = _limit * decimals;
     }
 
-    function deposit() public payable {}
+    // Payable method wich allows to send coins to a contract balance
+    function deposit() public payable {
+        Deposit(msg.sender, msg.value);
+    }
 
+    // Check if current balance is greate then a limit to allow withdrawing
     function canWithdraw() public constant returns (bool){
         return this.balance >= limit;
     }
 
+    // Send entire balance to the contract owner
     function withdraw() public isOwner {
         require(canWithdraw());
 
         msg.sender.transfer(this.balance);
-    }
-
-    function getLimit() public constant returns(uint) {
-        return limit;
     }
 }

@@ -1,5 +1,5 @@
 {
-    "address": "0x46b472DD83D36e049ce0986357819fA15CD514A3",
+    "address": "0x61127764c81B433C1d099C532827fA07696276D1",
     "interface": [
         {
             "constant": false,
@@ -44,21 +44,6 @@
         {
             "constant": true,
             "inputs": [],
-            "name": "getLimit",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function",
-            "signature": "0xb295a00e"
-        },
-        {
-            "constant": true,
-            "inputs": [],
             "name": "canWithdraw",
             "outputs": [
                 {
@@ -92,6 +77,24 @@
             "stateMutability": "nonpayable",
             "type": "constructor",
             "signature": "constructor"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "from",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "Deposit",
+            "type": "event",
+            "signature": "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c"
         }
     ]
 }
