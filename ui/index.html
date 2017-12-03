@@ -12,47 +12,42 @@
 	margin: 0;
 	padding: 0;
 }
-
 a {
-	color: #06f;
+	color: #AAAAAA;
 }
-
 body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
 }
-
 #app {
     height: 100%;
 }
-
 .appContainer {
     min-height: 100%;
 	display: grid;
 	grid-template-rows: auto 1fr auto;
 }
-
 .pageHeader {
 	display: flex;
 	flex-flow: row;
 	box-sizing: border-box;
 }
-
 .pageHeader-cell {
     	padding: 20px;
     }
-
 .pageHeader-brand {
     	font-size: 100%;
     	margin: 0;
+    	color: #3D9970;
     }
-
 .pageHeader-slogan {
     	color: #999;
     	margin: 0;
     }
-
+.walletStatus-value {
+        color: #3D9970;
+    }
 .app {
 	display: flex;
 	justify-content: center;
@@ -60,7 +55,6 @@ body {
 
 	background: #eee;
 }
-
 .piggy {
 	align-self: center;
 	justify-self: center;
@@ -72,18 +66,15 @@ body {
 	box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.05);
 	min-width: 300px;
 }
-
 .piggy-title {
     	margin: 0;
     	font-size: 100%;
     }
-
 .piggy-button {
         width: 100%;
         padding: 10px;
         margin-top: 10px;
     }
-
 .piggy-address {
         border: 1px solid #ccc;
         background-color: #eee;
@@ -96,11 +87,9 @@ body {
         padding: 3px;
         box-sizing: border-box;
     }
-
 .piggy-line {
         margin-bottom: 10px;
     }
-
 .pageFooter {
 	display: flex;
 	flex-flow: row;
@@ -108,30 +97,28 @@ body {
 
 	color: #ccc;
 }
-
 .pageFooter-cell {
 		padding: 20px;
 	}
-
+.ethers {
+    color: #3D9970;
+}
 .spacer {
 	flex: auto;
 }
-
 table {
     width: 100%;
 }
-
 .app-error {
     padding: 10px;
-    border: 2px solid red;
+    border: 2px solid #FF4136;
     margin-bottom: 10px;
     background-color: #ffeeee;
+    color: #FF4136;
 }
-
 .to-right {
     text-align: right;
 }
-
 hr {
     border-width: 0;
     border-top: 1px solid #ccc;
@@ -545,7 +532,7 @@ exports.default = () => _preact2.default.h(
         _preact2.default.h(
             "a",
             { href: "https://github.com/rumkin/piggy-bank" },
-            "Code"
+            "Source"
         ),
         " on Github"
     ),
@@ -553,7 +540,7 @@ exports.default = () => _preact2.default.h(
     _preact2.default.h(
         "div",
         { "class": "pageFooter-cell" },
-        "\xA9 Rumkin 2017."
+        "\xA9 Rumkin 2017"
     )
 );
 });
@@ -597,14 +584,14 @@ exports.default = ({ state }) => _preact2.default.h(
         { "class": "pageHeader-cell" },
         _preact2.default.h(
             "span",
-            { "class": "pageHeader-balance" },
+            { "class": "walletStatus" },
             "Balance: ",
             _preact2.default.h(
                 "strong",
-                null,
+                { "class": "walletStatus-value" },
                 state.balance
             ),
-            " eth."
+            " eth"
         )
     )
 );
@@ -688,14 +675,14 @@ const App = ({ state }) => {
                             _preact2.default.h(
                                 'td',
                                 null,
-                                'Balance'
+                                'Deposit'
                             ),
                             _preact2.default.h(
                                 'td',
                                 { 'class': 'to-right' },
                                 _preact2.default.h(
                                     'strong',
-                                    null,
+                                    { 'class': 'ethers' },
                                     state.contract.balance
                                 ),
                                 ' eth'
@@ -714,7 +701,7 @@ const App = ({ state }) => {
                                 { 'class': 'to-right' },
                                 _preact2.default.h(
                                     'strong',
-                                    null,
+                                    { 'class': 'ethers' },
                                     state.contract.limit
                                 ),
                                 ' eth'
@@ -756,7 +743,7 @@ const App = ({ state }) => {
                             'class': 'piggy-button',
                             onClick: withdraw
                         },
-                        'Withdraw all'
+                        'Withdraw deposit'
                     )
                 )
             )
