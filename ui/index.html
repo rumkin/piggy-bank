@@ -84,6 +84,23 @@ body {
         margin-top: 10px;
     }
 
+.piggy-address {
+        border: 1px solid #ccc;
+        background-color: #eee;
+        color: #333;
+        border-radius: 2px;
+        width: 100%;
+        display: block;
+        text-overflow: ellipsis;
+        text-align: center;
+        padding: 3px;
+        box-sizing: border-box;
+    }
+
+.piggy-line {
+        margin-bottom: 10px;
+    }
+
 .pageFooter {
 	display: flex;
 	flex-flow: row;
@@ -113,6 +130,13 @@ table {
 
 .to-right {
     text-align: right;
+}
+
+hr {
+    border-width: 0;
+    border-top: 1px solid #ccc;
+    margin: 20px 0;
+    padding: 0;
 }
         </style>
 
@@ -529,7 +553,7 @@ exports.default = () => _preact2.default.h(
     _preact2.default.h(
         "div",
         { "class": "pageFooter-cell" },
-        "\xA9 Rumkin 2017"
+        "\xA9 Rumkin 2017."
     )
 );
 });
@@ -610,8 +634,8 @@ const App = ({ state }) => {
         request('/withdraw', 'post');
     };
 
-    const deposit = () => {
-        request('/deposit', 'post');
+    const deposit = value => () => {
+        request('/deposit?value=' + value, 'post');
     };
 
     const reset = () => {
@@ -641,6 +665,15 @@ const App = ({ state }) => {
                         'h3',
                         { 'class': 'piggy-title' },
                         'Contract'
+                    ),
+                    _preact2.default.h(
+                        'p',
+                        null,
+                        _preact2.default.h(
+                            'code',
+                            { 'class': 'piggy-address' },
+                            state.contract.address
+                        )
                     )
                 ),
                 _preact2.default.h(
@@ -696,10 +729,27 @@ const App = ({ state }) => {
                         'button',
                         {
                             'class': 'piggy-button',
-                            onClick: deposit
+                            onClick: deposit(1)
                         },
                         'Deposit 1 ether'
                     ),
+                    _preact2.default.h(
+                        'button',
+                        {
+                            'class': 'piggy-button',
+                            onClick: deposit(100)
+                        },
+                        'Deposit 100 ethers'
+                    ),
+                    _preact2.default.h(
+                        'button',
+                        {
+                            'class': 'piggy-button',
+                            onClick: deposit(1000)
+                        },
+                        'Deposit 1000 ethers'
+                    ),
+                    _preact2.default.h('hr', { 'class': 'piggy-line' }),
                     _preact2.default.h(
                         'button',
                         {
