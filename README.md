@@ -5,6 +5,8 @@ It demonstrates how to use web3 library to deploy and interact with smart
 contracts, create web3 application powered with smart contracts and how
 to test contracts with mocha package.
 
+![UI screenshot](docs/screenshot.png)
+
 ### Warning
 
 This is only tutorial. And not a real application. It should not
