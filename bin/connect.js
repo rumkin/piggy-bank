@@ -1,4 +1,4 @@
-const {run} = require('./lib/utils.js');
+const {run} = require('../lib/utils.js');
 const Web3 = require('web3');
 
 async function main() {
