@@ -1,15 +1,13 @@
 # Piggy Bank
 
-Piggy bank is tutorial web application with Ethereum's smart contracts.
-It demonstrates how to use web3 library to deploy and interact with smart
+Piggy bank is tutorial web application which utilize Ethereum smart contract.
+It demonstrates how to use web3.js with Node.js to deploy and interact with smart
 contracts, create web3 application powered with smart contracts and how
-to test contracts with mocha package.
+to test contracts with mocha.
 
 ![UI screenshot](docs/screenshot.png)
 
-### Warning
-
-This is only tutorial. And not a real application. It should not
+> ⚠️ _WARNING_! This is only tutorial. And not a real application. It should not
 be used in production.
 
 ### Installation
@@ -17,10 +15,10 @@ be used in production.
 ```shell
 git clone git@github.com:rumkin/piggy-bank.git
 cd piggy-bank
-npm install .
+npm i # or npm ci
 ```
 
-It will install all required dependencies like web3, solc, ethereum testnet,
+It will install all required dependencies like web3, solc (solidity compiler), ethereum testnet,
 mocha and webserver.
 
 ### Testnet
